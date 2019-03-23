@@ -17,11 +17,8 @@ in vec4 vs_Rotation;
 in vec4 vs_Scale;
 in vec4 vs_Col; // An instanced rendering attribute; each particle instance has a different color
 
-out vec4 fs_Nor;
+out vec2 fs_Pos;
 out vec4 fs_Col;
-out vec4 fs_LightVec;
-
-const vec4 lightPos = vec4(100, 100, -100, 1);
 
 mat4 translationMatrix(vec4 t) {
   return mat4(
@@ -56,13 +53,11 @@ void main()
 {
   fs_Col = vs_Col;
 
-  fs_Nor = normalize(vec4(mat3(transpose(inverse(u_Model * translationMatrix(vs_Translate) * rotationMatrix(vs_Rotation) * scaleMatrix(vs_Scale)))) * vec3(vs_Nor), 0.0f));
-
   vec4 modelposition = u_Model * vs_Pos;
   modelposition = vec4(modelposition[0] * vs_Scale[0], modelposition[1] * vs_Scale[1], modelposition[2] * vs_Scale[2], 1.0f);
   vec3 newPos = 2.0f * dot(vec3(vs_Rotation), vec3(modelposition)) * vec3(vs_Rotation) + (vs_Rotation[3] * vs_Rotation[3] - dot(vec3(vs_Rotation), vec3(vs_Rotation))) * vec3(modelposition) + 2.0f * vs_Rotation[3] * cross(vec3(vs_Rotation), vec3(modelposition)) + vec3(vs_Translate);
   modelposition = vec4(newPos, 1.0f);
 
-  fs_LightVec = lightPos - modelposition;
+  fs_Pos = newPos.xy;
   gl_Position = u_ViewProj * modelposition;
 }

@@ -28,6 +28,10 @@ class Turtle {
     vec3.add(this.position, this.position, vec3.fromValues(this.scale[1] * this.orientation[0], this.scale[1] * this.orientation[1], this.scale[1] * this.orientation[2]));
   }
 
+  moveBack() {
+    vec3.add(this.position, this.position, vec3.fromValues(this.scale[1] * -this.orientation[0], this.scale[1] * -this.orientation[1], this.scale[1] * -this.orientation[2]));
+  }
+
   copy() {
     let newPosition: vec3 = vec3.create();
     vec3.copy(newPosition, this.position);

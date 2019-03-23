@@ -9,8 +9,6 @@ uniform int u_MapState;
 in vec2 fs_Pos;
 out vec4 out_Col;
 
-#define MAX_DIST 100.0
-
 float random1(vec2 p, vec2 seed) {
   return fract(sin(dot(p + seed, vec2(127.1, 311.7))) * 43758.5453);
 }
@@ -22,14 +20,6 @@ float quinticSmooth(float t) {
 
 float bias(float b, float t) {
   return pow(t, log(b) / log(0.5));
-}
-
-float gain(float g, float t) {
-  if (t < 0.5) {
-    return bias(1.0 - g, 2.0 * t) / 2.0;
-  } else {
-    return 1.0 - bias(1.0 - g, 2.0 - 2.0 * t) / 2.0;
-  }
 }
 
 float interpRand(float x, float z) {
@@ -55,7 +45,7 @@ float interpRand(float x, float z) {
   return mix(i1, i2, quinticSmooth(fractZ));
 }
 
-float heightField(vec2 pos) {
+float heightFieldFBM(vec2 pos) {
   float total = 0.0;
   int octaves = 16;
   float persistence = 0.5;
@@ -67,7 +57,7 @@ float heightField(vec2 pos) {
   return total;
 }
 
-float populationDensity(vec2 pos) {
+float populationDensityFBM(vec2 pos) {
   float total = 0.0;
   int octaves = 16;
   float persistence = 0.75;
@@ -82,8 +72,8 @@ float populationDensity(vec2 pos) {
 void main() {
   vec2 heightOffset = vec2(-1.89, -1.71);
   vec2 populationOffset = vec2(-1.89, -2.1);
-  float heightField = heightField(fs_Pos + heightOffset);
-  float populationDensity = populationDensity(fs_Pos + populationOffset);
+  float heightField = heightFieldFBM(fs_Pos + heightOffset);
+  float populationDensity = populationDensityFBM(fs_Pos + populationOffset);
   if (heightField > 0.75) {
     out_Col = vec4(vec3(51.0 / 255.0, 153.0 / 255.0, 255.0 / 255.0) * (2.0 - heightField), 1.0);
   } else {
@@ -103,5 +93,4 @@ void main() {
       out_Col = vec4(mix(heightCol, popCol, 0.5), 1.0);
     }
   }
-
 }

@@ -7,6 +7,7 @@ import OpenGLRenderer from './rendering/gl/OpenGLRenderer';
 import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
+import RoadNetwork from './RoadNetwork';
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -17,11 +18,20 @@ const controls = {
 };
 
 let screenQuad: ScreenQuad;
+let highway: Square;
 let time: number = 0.0;
 
 function loadScene() {
   screenQuad = new ScreenQuad();
   screenQuad.create();
+
+  let roadNetwork: RoadNetwork = new RoadNetwork(1, 1, 0);
+  roadNetwork.createNetwork();
+
+  highway = new Square();
+  highway.create();
+  highway.setInstanceVBOs(new Float32Array(roadNetwork.highwayTranslate), new Float32Array(roadNetwork.highwayRotate), new Float32Array(roadNetwork.highwayScale), new Float32Array(roadNetwork.highwayColor));
+  highway.setNumInstances(roadNetwork.highwayCount);
 }
 
 function main() {
@@ -36,21 +46,21 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
 
-  var showHeightController = gui.add(controls, 'showHeight').listen();
+  var showHeightController = gui.add(controls, 'showHeight').name("Show Height").listen();
   showHeightController.onChange(function(value: boolean){
     controls.showHeight = true;
     controls.showPopulation = false;
     controls.showBoth = false;
   });
 
-  var showPopulationController = gui.add(controls, 'showPopulation').listen();
+  var showPopulationController = gui.add(controls, 'showPopulation').name("Show Population").listen();
   showPopulationController.onChange(function(value: boolean){
     controls.showHeight = false;
     controls.showPopulation = true;
     controls.showBoth = false;
   });
 
-  var showBothController = gui.add(controls, 'showBoth').listen();
+  var showBothController = gui.add(controls, 'showBoth').name("Show Both").listen();
   showBothController.onChange(function(value: boolean){
     controls.showHeight = false;
     controls.showPopulation = false;
@@ -104,7 +114,9 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
     renderer.render(camera, flat, [screenQuad]);
-    renderer.render(camera, instancedShader, []);
+    renderer.render(camera, instancedShader, [
+      highway
+    ]);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame
