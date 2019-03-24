@@ -19,19 +19,26 @@ const controls = {
 
 let screenQuad: ScreenQuad;
 let highway: Square;
+
+let roadNetwork: RoadNetwork;
+let terrainPixels: Uint8Array;
+let width: number = 1920;
+let height: number = 1080;
 let time: number = 0.0;
 
-function loadScene() {
+function createScreenQuad() {
   screenQuad = new ScreenQuad();
   screenQuad.create();
-
-  let roadNetwork: RoadNetwork = new RoadNetwork(1, 1, 0);
-  roadNetwork.createNetwork();
-
   highway = new Square();
   highway.create();
-  highway.setInstanceVBOs(new Float32Array(roadNetwork.highwayTranslate), new Float32Array(roadNetwork.highwayRotate), new Float32Array(roadNetwork.highwayScale), new Float32Array(roadNetwork.highwayColor));
-  highway.setNumInstances(roadNetwork.highwayCount);
+}
+
+function createRoadNetwork() {
+  roadNetwork = new RoadNetwork(1, 1, 0, terrainPixels, width, height);
+  //roadNetwork.createNetwork();
+
+  //highway.setInstanceVBOs(new Float32Array(roadNetwork.highwayTranslate), new Float32Array(roadNetwork.highwayRotate), new Float32Array(roadNetwork.highwayScale), new Float32Array(roadNetwork.highwayColor));
+  //highway.setNumInstances(roadNetwork.highwayCount);
 }
 
 function main() {
@@ -78,15 +85,15 @@ function main() {
   setGL(gl);
 
   // Initial call to load scene
-  loadScene();
+  createScreenQuad();
 
   const camera = new Camera(vec3.fromValues(50, 50, 10), vec3.fromValues(50, 50, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
-  gl.enable(gl.BLEND);
+  // gl.enable(gl.BLEND);
+  gl.enable(gl.DEPTH_TEST);
   gl.blendFunc(gl.ONE, gl.ONE); // Additive blending
-  // gl.enable(gl.DEPTH_TEST);
 
   const instancedShader = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/instanced-vert.glsl')),
@@ -98,24 +105,69 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/flat-frag.glsl')),
   ]);
 
+  const textureShader = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/texture-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/texture-frag.glsl')),
+  ]);
+
+  var frameBuffer = gl.createFramebuffer();
+  var renderBuffer = gl.createRenderbuffer();
+  var terrainTexture = gl.createTexture();
+
+  gl.bindTexture(gl.TEXTURE_2D, terrainTexture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, terrainTexture, 0);
+  gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer);
+  gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+  gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderBuffer);
+
+  gl.drawBuffers([gl.COLOR_ATTACHMENT0]);
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+  gl.bindTexture(gl.TEXTURE_2D, terrainTexture);
+  gl.viewport(0, 0, width, height);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  renderer.render(camera, flat, [screenQuad]);
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, terrainTexture, 0);
+  terrainPixels = new Uint8Array(width * height * 4);
+  gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, terrainPixels);
+
+  createRoadNetwork();
+
   // This function will be called every frame
   function tick() {
     camera.update();
     stats.begin();
     instancedShader.setTime(time);
     flat.setTime(time++);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, width, height);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, terrainTexture);
+
     if (controls.showHeight) {
-      flat.setMapState(0);
+      textureShader.setMapState(0);
     } else if (controls.showPopulation) {
-      flat.setMapState(1);
+      textureShader.setMapState(1);
     } else if (controls.showBoth) {
-      flat.setMapState(2);
+      textureShader.setMapState(2);
     }
-    gl.viewport(0, 0, window.innerWidth, window.innerHeight);
-    renderer.clear();
-    renderer.render(camera, flat, [screenQuad]);
+
+    renderer.render(camera, textureShader, [screenQuad]);
     renderer.render(camera, instancedShader, [
-      highway
+      //highway
     ]);
     stats.end();
 
@@ -124,16 +176,16 @@ function main() {
   }
 
   window.addEventListener('resize', function() {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.setAspectRatio(window.innerWidth / window.innerHeight);
+    renderer.setSize(width, height);
+    camera.setAspectRatio(width / height);
     camera.updateProjectionMatrix();
-    flat.setDimensions(window.innerWidth, window.innerHeight);
+    flat.setDimensions(width, height);
   }, false);
 
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  camera.setAspectRatio(window.innerWidth / window.innerHeight);
+  renderer.setSize(width, height);
+  camera.setAspectRatio(width / height);
   camera.updateProjectionMatrix();
-  flat.setDimensions(window.innerWidth, window.innerHeight);
+  flat.setDimensions(width, height);
 
   // Start the render loop
   tick();

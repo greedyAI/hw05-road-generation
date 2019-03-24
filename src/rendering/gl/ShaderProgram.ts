@@ -40,6 +40,7 @@ class ShaderProgram {
   unifUp: WebGLUniformLocation;
   unifDimensions: WebGLUniformLocation;
   unifMapState: WebGLUniformLocation;
+  unifSampler2D: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -163,7 +164,7 @@ class ShaderProgram {
 
     if (this.attrTranslate != -1 && d.bindTranslate()) {
       gl.enableVertexAttribArray(this.attrTranslate);
-      gl.vertexAttribPointer(this.attrTranslate, 4, gl.FLOAT, false, 0, 0);
+      gl.vertexAttribPointer(this.attrTranslate, 3, gl.FLOAT, false, 0, 0);
       gl.vertexAttribDivisor(this.attrTranslate, 1); // Advance 1 index in translate VBO for each drawn instance
     }
 
@@ -209,6 +210,8 @@ class ShaderProgram {
     if (this.attrRotation != -1) gl.disableVertexAttribArray(this.attrRotation);
     if (this.attrScale != -1) gl.disableVertexAttribArray(this.attrScale);
     if (this.attrCol != -1) gl.disableVertexAttribArray(this.attrCol);
+
+    gl.uniform1i(this.unifSampler2D, 0);
   }
 };
 
