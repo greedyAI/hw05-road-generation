@@ -25,9 +25,7 @@ class RoadNetwork {
   streetCount: number = 0;
 
   constructor(highwayDensity: number, streetDensity: number, highwayThreshold: number, terrainTexture: Uint8Array, width: number, height: number) {
-    console.log("A");
     this.terrain = new Terrain(terrainTexture, width, height);
-    console.log("B");
     let randX: number = this.terrain.noise(vec3.fromValues(0.0,0.0,0.0)) - 0.5;
     let lowestY: number = -1.0;
     console.log(this.terrain.heightField(vec2.fromValues(randX, lowestY)));
