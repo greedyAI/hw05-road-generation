@@ -19,6 +19,7 @@ const controls = {
   showBoth: true,
   highwayDensity: 1,
   streetDensity: 3,
+  populationThreshold: 0.9,
   randomSeed: 0.0
 };
 
@@ -42,7 +43,7 @@ function createScreenQuad() {
 }
 
 function createRoadNetwork() {
-  roadNetwork = new RoadNetwork(controls.checkered, controls.highwayDensity, controls.streetDensity, 0.9, controls.randomSeed, terrainPixels, width, height);
+  roadNetwork = new RoadNetwork(controls.checkered, controls.highwayDensity, controls.streetDensity, controls.populationThreshold, controls.randomSeed, terrainPixels, width, height);
   roadNetwork.createNetwork();
 
   highway.setInstanceVBOs(new Float32Array(roadNetwork.highwayTranslate), new Float32Array(roadNetwork.highwayRotate), new Float32Array(roadNetwork.highwayScale), new Float32Array(roadNetwork.highwayColor));
@@ -67,6 +68,7 @@ function main() {
   gui.add(controls, 'Regenerate');
   gui.add(controls, 'highwayDensity', 0.2, 2).name("Highway Density");
   gui.add(controls, 'streetDensity', 1, 3).name("Street Density");
+  gui.add(controls, 'populationThreshold', 0, 2).name("Population Threshold");
   gui.add(controls, 'randomSeed', -1000, 1000).name("Random Seed");
   gui.add(controls, 'checkered').name("Checkered Road Networking");
 

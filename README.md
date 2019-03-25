@@ -24,6 +24,7 @@ _Wei (Waley) Zhang (PennKey: wzha)_
   - __User controls via dat.GUI.__: The user can control the followings features in my scene:
     - Highway density. _Note: if the highways are too dense, it may not be able to cross large bodies of water._
     - Street density.
+    - Population threshold for highway branching (ie. the minimal population density at the endpoint of the proposed branch for the branching to be successfully performed).
     - Random seed for initial turtle position of highway system.
     - Toggle for checkered road networking: if on, all roads will lie parallel to either the x or y axes.
     - Height vs. Population Density vs. Overlayed terrain maps.
