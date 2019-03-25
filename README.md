@@ -16,11 +16,11 @@ _Wei (Waley) Zhang (PennKey: wzha)_
     - All branch angles are between 15 and 90 degrees, but randomly generated via a noise function.
     - After branching out, the turtle moves forward. If the turtle moves into water, it moves forward again and check if it is on land again. If so, the turtle completes this "double move" to create a bridge across the body of water. Therefore, as long as the highway density is not too high, the turtle can cross most bodies of water.
     - The turtle "dies" (ie. stops moving forward and branching out) if it can no longer branch out nor move forward without landing on water, and it cannot form a bridge.
-    - The highway system is self-sensitive. It generates edges and intersections based on other highways in its local region, per section 3.3.1 of Procedural Modeling of Cities.
+    - The highway system is self-sensitive. It generates edges and intersections based on other highways in its local region, per section 3.3.1 of [Procedural Modeling of Cities](proceduralCityGeneration.pdf).
   - __Road system__: The road system is generated using a breadth-first-search version of a L-system with the following rules:
     - At every step, the L-system's turtle branches 90 degrees to its left and 90 degrees to its right.
     - After branching out, the turtle moves forward. If the turtle moves into water, it "dies", and we move onto the next turtle in the turtle queue.
-    - The road system is self-sensitive. It generates edges and intersections based on other roads _and_ highways in its local region, per section 3.3.1 of Procedural Modeling of Cities.
+    - The road system is self-sensitive. It generates edges and intersections based on other roads _and_ highways in its local region, per section 3.3.1 of [Procedural Modeling of Cities](proceduralCityGeneration.pdf).
   - __User controls via dat.GUI.__: The user can control the followings features in my scene:
     - Highway density. _Note: if the highways are too dense, it may not be able to cross large bodies of water._
     - Street density.
