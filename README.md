@@ -22,7 +22,7 @@ _Wei (Waley) Zhang (PennKey: wzha)_
     - After branching out, the turtle moves forward. If the turtle moves into water, it "dies", and we move onto the next turtle in the turtle queue.
     - The road system is self-sensitive. It generates edges and intersections based on other roads _and_ highways in its local region, per section 3.3.1 of Procedural Modeling of Cities.
   - __User controls via dat.GUI.__: The user can control the followings features in my scene:
-    - Highway density. _Note: if the highways are too density, it may not be able to cross large bodies of water._
+    - Highway density. _Note: if the highways are too dense, it may not be able to cross large bodies of water._
     - Street density.
     - Random seed for initial turtle position of highway system.
     - Toggle for checkered road networking: if on, all roads will lie parallel to either the x or y axes.
