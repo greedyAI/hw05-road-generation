@@ -12,9 +12,14 @@ import RoadNetwork from './RoadNetwork';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
+  'Regenerate': createRoadNetwork,
+  checkered: false,
   showHeight: false,
   showPopulation: false,
-  showBoth: true
+  showBoth: true,
+  highwayDensity: 1,
+  streetDensity: 3,
+  randomSeed: 0.0
 };
 
 let screenQuad: ScreenQuad;
@@ -37,7 +42,7 @@ function createScreenQuad() {
 }
 
 function createRoadNetwork() {
-  roadNetwork = new RoadNetwork(1, 3, 0.9, terrainPixels, width, height);
+  roadNetwork = new RoadNetwork(controls.checkered, controls.highwayDensity, controls.streetDensity, 0.9, controls.randomSeed, terrainPixels, width, height);
   roadNetwork.createNetwork();
 
   highway.setInstanceVBOs(new Float32Array(roadNetwork.highwayTranslate), new Float32Array(roadNetwork.highwayRotate), new Float32Array(roadNetwork.highwayScale), new Float32Array(roadNetwork.highwayColor));
@@ -58,6 +63,12 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
+
+  gui.add(controls, 'Regenerate');
+  gui.add(controls, 'highwayDensity', 0.2, 2).name("Highway Density");
+  gui.add(controls, 'streetDensity', 1, 3).name("Street Density");
+  gui.add(controls, 'randomSeed', -1000, 1000).name("Random Seed");
+  gui.add(controls, 'checkered').name("Checkered Road Networking");
 
   var showHeightController = gui.add(controls, 'showHeight').name("Show Height").listen();
   showHeightController.onChange(function(value: boolean){
