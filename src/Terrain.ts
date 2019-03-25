@@ -23,10 +23,10 @@ class Terrain {
   }
 
   heightField(pos: vec2) {
-    let x = Math.floor((pos[0] + 1.0) * this.width / 2.0);
-    x = Math.max(0.0, Math.min(x, 1.0));
-    let y = Math.floor((pos[1] + 1.0) * this.height / 2.0);
-    y = Math.max(0.0, Math.min(y, 1.0));
+    let x: number = Math.floor((pos[0] + 1.0) * this.width / 2.0);
+    x = Math.max(0.0, Math.min(x, this.width));
+    let y: number = Math.floor((pos[1] + 1.0) * this.height / 2.0);
+    y = Math.max(0.0, Math.min(y, this.height));
 
     let heightField = this.terrainTexture[y * this.width * 4 + x * 4] * 2.0 / 255.0;
     if (heightField > 0.75) {
@@ -37,10 +37,10 @@ class Terrain {
   }
 
   populationDensity(pos: vec2) {
-    let x = Math.floor((pos[0] + 1.0) * this.width / 2.0);
-    x = Math.max(0.0, Math.min(x, 1.0));
-    let y = Math.floor((pos[1] + 1.0) * this.height / 2.0);
-    y = Math.max(0.0, Math.min(y, 1.0));
+    let x: number = Math.floor((pos[0] + 1.0) * this.width / 2.0);
+    x = Math.max(0.0, Math.min(x, this.width));
+    let y: number = Math.floor((pos[1] + 1.0) * this.height / 2.0);
+    y = Math.max(0.0, Math.min(y, this.height));
 
     let heightField = this.terrainTexture[y * this.width * 4 + x * 4] * 2.0 / 255.0;
     let populationDensity = this.terrainTexture[y * this.width * 4 + x * 4 + 3] * 2.0 / 255.0;

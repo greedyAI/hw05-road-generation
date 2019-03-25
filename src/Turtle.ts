@@ -5,12 +5,14 @@ class Turtle {
   orientation: vec3; // index 0 = right, index 1 = up, index 2 = forward
   scale: vec3;  // index 0 = right, index 1 = up, index 2 = forward
   depth: number;
+  streetScale: number;
 
   constructor(position: vec3, orientation: vec3, scale: vec3, depth: number) {
     this.position = position;
     this.orientation = orientation;
     this.scale = scale;
     this.depth = depth;
+    this.streetScale = 1;
   }
 
   rotate(axisOfRotation: vec3, angle: number) {
@@ -25,11 +27,11 @@ class Turtle {
   }
 
   move() {
-    vec3.add(this.position, this.position, vec3.fromValues(this.scale[1] * this.orientation[0], this.scale[1] * this.orientation[1], this.scale[1] * this.orientation[2]));
+    vec3.add(this.position, this.position, vec3.fromValues(this.scale[1] * this.orientation[0] * this.streetScale, this.scale[1] * this.orientation[1] * this.streetScale, this.scale[1] * this.orientation[2] * this.streetScale));
   }
 
   moveBack() {
-    vec3.add(this.position, this.position, vec3.fromValues(this.scale[1] * -this.orientation[0], this.scale[1] * -this.orientation[1], this.scale[1] * -this.orientation[2]));
+    vec3.add(this.position, this.position, vec3.fromValues(this.scale[1] * -this.orientation[0] * this.streetScale, this.scale[1] * -this.orientation[1] * this.streetScale, this.scale[1] * -this.orientation[2] * this.streetScale));
   }
 
   copy() {

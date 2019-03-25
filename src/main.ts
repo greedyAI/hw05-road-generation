@@ -19,6 +19,7 @@ const controls = {
 
 let screenQuad: ScreenQuad;
 let highway: Square;
+let street: Square;
 
 let roadNetwork: RoadNetwork;
 let terrainPixels: Uint8Array;
@@ -31,14 +32,19 @@ function createScreenQuad() {
   screenQuad.create();
   highway = new Square();
   highway.create();
+  street = new Square();
+  street.create();
 }
 
 function createRoadNetwork() {
-  roadNetwork = new RoadNetwork(1, 1, 0, terrainPixels, width, height);
+  roadNetwork = new RoadNetwork(1, 3, 0.9, terrainPixels, width, height);
   roadNetwork.createNetwork();
 
   highway.setInstanceVBOs(new Float32Array(roadNetwork.highwayTranslate), new Float32Array(roadNetwork.highwayRotate), new Float32Array(roadNetwork.highwayScale), new Float32Array(roadNetwork.highwayColor));
   highway.setNumInstances(roadNetwork.highwayCount);
+
+  street.setInstanceVBOs(new Float32Array(roadNetwork.streetTranslate), new Float32Array(roadNetwork.streetRotate), new Float32Array(roadNetwork.streetScale), new Float32Array(roadNetwork.streetColor));
+  street.setNumInstances(roadNetwork.streetCount);
 }
 
 function main() {
@@ -125,10 +131,6 @@ function main() {
   gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, terrainTexture, 0);
 
-  terrainPixels = new Uint8Array(width * height * 4);
-  gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, terrainPixels);
-  createRoadNetwork();
-
   gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer);
   gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
   gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderBuffer);
@@ -144,6 +146,10 @@ function main() {
 
   gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, terrainTexture, 0);
+
+  terrainPixels = new Uint8Array(width * height * 4);
+  gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, terrainPixels);
+  createRoadNetwork();
 
   // This function will be called every frame
   function tick() {
@@ -168,7 +174,8 @@ function main() {
 
     renderer.render(camera, textureShader, [screenQuad]);
     renderer.render(camera, instancedShader, [
-      highway
+      highway,
+      street
     ]);
     stats.end();
 
